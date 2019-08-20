@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	gorm "github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 //MigrateDB maps the Login struct fields to a newly created IPAccess SQL table
 //where we can store IPAccesss
-func MigrateDB() {
+func MigrateDB() error {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
 	defer db.Close()
 
@@ -19,6 +19,8 @@ func MigrateDB() {
 
 	// Migrate the schema
 	db.AutoMigrate(&IPAccess{})
+
+	return nil
 }
 
 //CreateIPAccess creates a new IPAccess entry in the IPAccess db table
@@ -34,7 +36,29 @@ func CreateIPAccess(ipAccess *IPAccess) {
 	db.Create(&ipAccess)
 }
 
-func QueryIPAccess(ipAccess *IPAccess) {
+func GetPrecedingIPAccess(unixTimestamp int, userName string) IPAccess {
+	db, err := gorm.Open("sqlite3", "supermanDetector.db")
+	defer db.Close()
+
+	//panicking if unable to successfully connect to the sqliteDB
+	if err != nil {
+		panic(err)
+	}
+	// tableName := db.NewScope(IPAccess{}).GetModelStruct().TableName(db)
+  // fmt.Println("T A B L E YOOOO")
+	// fmt.Println(tableName)
+	// fmt.Println("T A B L E YOOOO")
+
+	ipAccess := IPAccess{}
+
+	db.Raw("SELECT * FROM ip_accesses WHERE ip_accesses.unix_timestamp < ? AND ip_accesses.username = ? ORDER BY unix_timestamp DESC LIMIT 1",
+	unixTimestamp, userName).Scan(&ipAccess)
+
+
+	return ipAccess
+}
+
+func GetSubsequentIPAccess(unixTimestamp int, userName string) IPAccess {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
 	defer db.Close()
 
@@ -43,7 +67,11 @@ func QueryIPAccess(ipAccess *IPAccess) {
 		panic(err)
 	}
 
-	db.First(&ipAccess, "unix_timestamp = ?", 1514764800) // find product with code l1212
+	ipAccess := IPAccess{}
 
-	fmt.Println(ipAccess)
+	db.Raw("SELECT * FROM ip_accesses WHERE ip_accesses.unix_timestamp > ? AND ip_accesses.username = ? ORDER BY unix_timestamp ASC LIMIT 1",
+	unixTimestamp, userName).Scan(&ipAccess)
+
+
+	return ipAccess
 }

@@ -5,8 +5,9 @@ import (
 	"net"
 )
 
-// GetIPCoordinates converts a string to an IP object, passes the IP to the
-// geoDB for a search and returns the IP's coordinates and an error
+// GetIPCoordinates takes a pointer to an IPAccess, passes the IP to the
+// geoDB for a search and then sets the Latitude, Longitude, and Radius on
+//the IPAccess pointer
 func GetIPCoordinates(ipAccess *IPAccess) {
 	//TODO figure out if it's better to create a persistent db connection to the
 	//GeoLite2 db instead of opening and closing the connection for each query
@@ -28,5 +29,6 @@ func GetIPCoordinates(ipAccess *IPAccess) {
 
 	ipAccess.Latitude = record.Location.Latitude
 	ipAccess.Longitude = record.Location.Longitude
-	ipAccess.Radius = record.Location.AccuracyRadius
+	//final report expects radius as int NOT uint16, doing conversion here
+	ipAccess.Radius = int(record.Location.AccuracyRadius)
 }

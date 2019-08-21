@@ -13,7 +13,21 @@ var (
 )
 
 /*
+There is a bug in the challenge.
+
+In the Expected Request there is a timestamp of:                                   1514764800
+In the Expected Response for the proceeding ip access there is the same timestamp: 1514764800
+
+Current - New York
 curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764800, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e42", "ip_address": "206.81.252.6"}' http://localhost:5000/v1/ipaccess
+PrecedingIPAccess - Moscow
+curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764700, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e43", "ip_address": "31.173.221.5"}' http://localhost:5000/v1/ipaccess
+SubsequentIPAccess - Hong_Kong
+curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764900, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e46", "ip_address": "119.28.48.231"}' http://localhost:5000/v1/ipaccess
+
+MOST SubsequentIPAccess - New York
+curl -X POST -d '{"username": "bob", "unix_timestamp": 1514765000, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e45", "ip_address": "206.81.252.7"}' http://localhost:5000/v1/ipaccess
+
 */
 
 func IPAccessHandler(w http.ResponseWriter, r *http.Request) {

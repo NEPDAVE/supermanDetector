@@ -1,7 +1,8 @@
 package main
 
 import (
-//"fmt"
+	"fmt"
+	"github.com/umahmood/haversine"
 )
 
 type Report struct {
@@ -38,8 +39,16 @@ func NewReport(ipAccess *IPAccess) *Report {
 	report := &Report{}
 
 	report.SetCurrentGeo(ipAccess.Latitude, ipAccess.Longitude, ipAccess.Radius)
-	report.SetPrecedingIPAccess(ipAccess.UnixTimestamp, ipAccess.Username)
-	report.SetSubsequentIPAccess(ipAccess.UnixTimestamp, ipAccess.Username)
+
+	report.SetPrecedingIPAccess(ipAccess.UnixTimestamp, ipAccess.EventUUID,
+		ipAccess.Username)
+
+	report.SetSubsequentIPAccess(ipAccess.UnixTimestamp, ipAccess.EventUUID,
+		ipAccess.Username)
+
+	report.SetTravelToCurrentGeoSuspicious()
+
+	report.SetTravelFromCurrentGeoSuspicious()
 
 	return report
 }
@@ -49,18 +58,24 @@ because events can arrive out of order calculating speed if the booleans for
 shit should be calculated each time on the fly
 */
 
-func (rp *Report) SetCurrentGeo(latitude float64, longitude float64, radius int) {
-	rp.CurrentGeo = CurrentGeo{
+func (r *Report) SetCurrentGeo(latitude float64, longitude float64, radius int) {
+	r.CurrentGeo = CurrentGeo{
 		Lat:    latitude,
 		Lon:    longitude,
 		Radius: radius,
 	}
 }
 
-func (rp *Report) SetPrecedingIPAccess(unixTimestamp int, userName string) {
-	precedingIPAccess := GetPrecedingIPAccess(unixTimestamp, userName)
+func (r *Report) SetPrecedingIPAccess(unixTimestamp int, eventUUID string,
+	userName string) {
+	precedingIPAccess := GetPrecedingIPAccess(unixTimestamp, eventUUID, userName)
 
-	rp.PrecedingIPAccess = PrecedingIPAccess{
+	//checking for an ip of "" to prevent a false positive
+	if precedingIPAccess.IPAddress == "" {
+		return
+	}
+
+	r.PrecedingIPAccess = PrecedingIPAccess{
 		IP:        precedingIPAccess.IPAddress,
 		Lat:       precedingIPAccess.Latitude,
 		Lon:       precedingIPAccess.Longitude,
@@ -68,13 +83,27 @@ func (rp *Report) SetPrecedingIPAccess(unixTimestamp int, userName string) {
 		Timestamp: precedingIPAccess.UnixTimestamp,
 	}
 
-	//TODO need to calculate speed for PrecedingIPAccess
+	//calculating speed for PrecedingIPAccess
+	currentCoord := haversine.Coord{Lat: r.CurrentGeo.Lat, Lon: r.CurrentGeo.Lon}
+	precedingCoord := haversine.Coord{Lat: r.PrecedingIPAccess.Lat,
+		Lon: r.PrecedingIPAccess.Lon}
+
+	_, km := haversine.Distance(currentCoord, precedingCoord)
+
+	time := unixTimestamp - precedingIPAccess.UnixTimestamp
+	r.PrecedingIPAccess.Speed = CalculateSpeed(time, km)
 }
 
-func (rp *Report) SetSubsequentIPAccess(unixTimestamp int, userName string) {
-	subsequentIPAccess := GetSubsequentIPAccess(unixTimestamp, userName)
+func (r *Report) SetSubsequentIPAccess(unixTimestamp int, eventUUID string,
+	userName string) {
+	subsequentIPAccess := GetSubsequentIPAccess(unixTimestamp, eventUUID, userName)
 
-	rp.SubsequentIPAccess = SubsequentIPAccess{
+	//checking for an ip of "" to prevent a false positive
+	if subsequentIPAccess.IPAddress == "" {
+		return
+	}
+
+	r.SubsequentIPAccess = SubsequentIPAccess{
 		IP:        subsequentIPAccess.IPAddress,
 		Lat:       subsequentIPAccess.Latitude,
 		Lon:       subsequentIPAccess.Longitude,
@@ -82,13 +111,39 @@ func (rp *Report) SetSubsequentIPAccess(unixTimestamp int, userName string) {
 		Timestamp: subsequentIPAccess.UnixTimestamp,
 	}
 
-	//TODO need to calculate speed for PrecedingIPAccess
+	//calculating speed for PrecedingIPAccess
+	currentCoord := haversine.Coord{Lat: r.CurrentGeo.Lat, Lon: r.CurrentGeo.Lon}
+	precedingCoord := haversine.Coord{Lat: r.SubsequentIPAccess.Lat,
+		Lon: r.SubsequentIPAccess.Lon}
+
+	_, km := haversine.Distance(currentCoord, precedingCoord)
+
+	time := subsequentIPAccess.UnixTimestamp - unixTimestamp
+	r.PrecedingIPAccess.Speed = CalculateSpeed(time, km)
 }
 
-func (rp *Report) SetTravelToCurrentGeoSuspicious() {
-
+func (r *Report) SetTravelToCurrentGeoSuspicious() {
+	if r.PrecedingIPAccess.Speed >= 500 {
+		r.TravelToCurrentGeoSuspicious = true
+	}
+	fmt.Println(r.TravelToCurrentGeoSuspicious)
 }
 
-func (rp *Report) SetTravelFromCurrentGeoSuspicious() {
+func (r *Report) SetTravelFromCurrentGeoSuspicious() {
+	if r.SubsequentIPAccess.Speed >= 500 {
+		r.TravelFromCurrentGeoSuspicious = true
+	}
 
+	fmt.Println(r.TravelFromCurrentGeoSuspicious)
+}
+
+//CalculateSpeed takes an amount of time in seconds and a distance in Kilometers
+//and returns the Kilometers per hour
+func CalculateSpeed(time int, km float64) int {
+	floatTime := float64(time)
+	//calculates KM per second
+	kmPerSecond := km / floatTime
+	//converts the KM per second to KM per hour
+	kmPerHour := kmPerSecond * 60 * 60
+	return int(kmPerHour)
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	geoip2 "github.com/oschwald/geoip2-golang"
 	"net"
 )
@@ -37,6 +38,10 @@ func GetIPCoordinates(ipStr string) *Coordinates {
 		Longitude: record.Location.Longitude,
 		Radius:    int(record.Location.AccuracyRadius), //final report expects int
 	}
+
+	fmt.Println("Location:")
+	fmt.Println(record.Location)
+	fmt.Println("")
 
 	return coordinates
 }

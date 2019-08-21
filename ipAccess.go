@@ -41,7 +41,7 @@ func (i IPAccess) NewIPAccess(r *http.Request) *IPAccess {
 	//Setting the IP Latitude, Longitude and Radius fields
 	ipAccess.SetIPCoordinates()
 	//Writing the fully populated IPAccess struct to the sqlDB
-	ipAccess.WriteIPAccessToDB()
+	CreateIPAccess(ipAccess)
 
 	return ipAccess
 }
@@ -49,10 +49,9 @@ func (i IPAccess) NewIPAccess(r *http.Request) *IPAccess {
 //SetCoordinates calls GetIPCoordinates to query the geoDB and set the IPAccess
 //Latitude, Longitude and Radius fields
 func (i *IPAccess) SetIPCoordinates() {
-	GetIPCoordinates(i)
-}
+	coordinates := GetIPCoordinates(i.IPAddress)
 
-//WriteIPAccessToDB writes an IPAccess struct to the sqlDB
-func (i *IPAccess) WriteIPAccessToDB() {
-	CreateIPAccess(i)
+	i.Latitude = coordinates.Latitude
+	i.Longitude = coordinates.Longitude
+	i.Radius = coordinates.Radius
 }

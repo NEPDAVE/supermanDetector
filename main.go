@@ -24,11 +24,12 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  //passing the request to NewReport to kick things off
+	//passing the request to NewReport to kick things off
 	report := Report{}.NewReport(r)
 
-  //checking that the report was populated
-  reportCheck := &Report{}
+	//checking that the report was populated
+	reportCheck := &Report{}
+
 	if report == reportCheck {
 		fmt.Fprintf(w, "%s\n", "Server Error 500 - Please Try Again")
 	}

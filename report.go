@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"net/http"
 )
 
@@ -36,17 +36,12 @@ type SubsequentIPAccess struct {
 
 func (rp Report) NewReport(r *http.Request) *Report {
 	ipAccess := IPAccess{}.NewIPAccess(r)
+	report := &Report{}
 
-	report := &Report{
-		CurrentGeo: CurrentGeo{
-			Lat:    ipAccess.Latitude,
-			Lon:    ipAccess.Longitude,
-			Radius: ipAccess.Radius,
-		},
-	}
-
+	report.SetCurrentGeo(ipAccess.Latitude, ipAccess.Longitude, ipAccess.Radius)
 	report.SetPrecedingIPAccess(ipAccess.UnixTimestamp, ipAccess.Username)
 	report.SetSubsequentIPAccess(ipAccess.UnixTimestamp, ipAccess.Username)
+
 	return report
 }
 
@@ -55,31 +50,46 @@ because events can arrive out of order calculating speed if the booleans for
 shit should be calculated each time on the fly
 */
 
-//TODO have this use pointers like the other one
-func (r *Report) SetPrecedingIPAccess(unixTimestamp int, userName string) {
-	//this is where speed should be set/calculated
+func (rp *Report) SetCurrentGeo(latitude float64, longitude float64, radius int) {
+	rp.CurrentGeo = CurrentGeo{
+		Lat:    latitude,
+		Lon:    longitude,
+		Radius: radius,
+	}
+}
+
+func (rp *Report) SetPrecedingIPAccess(unixTimestamp int, userName string) {
 	precedingIPAccess := GetPrecedingIPAccess(unixTimestamp, userName)
 
-	fmt.Println("PRECEDING S Q L MO FOOOKAA")
-	fmt.Println(precedingIPAccess)
-	fmt.Println("PRECEDING S Q L MO FOOOKAA")
+	rp.PrecedingIPAccess = PrecedingIPAccess{
+		IP:        precedingIPAccess.IPAddress,
+		Lat:       precedingIPAccess.Latitude,
+		Lon:       precedingIPAccess.Longitude,
+		Radius:    precedingIPAccess.Radius,
+		Timestamp: precedingIPAccess.UnixTimestamp,
+	}
+
+	//TODO need to calculate speed for PrecedingIPAccess
 }
 
-//TODO have this use pointers like the other one
-func (r *Report) SetSubsequentIPAccess(unixTimestamp int, userName string) {
-	//this is where speed should be set/calculated
+func (rp *Report) SetSubsequentIPAccess(unixTimestamp int, userName string) {
 	subsequentIPAccess := GetSubsequentIPAccess(unixTimestamp, userName)
 
-	fmt.Println("Subsequent S Q L MO FOOOKAA")
-	fmt.Println(subsequentIPAccess)
-	fmt.Println("Subsequent S Q L MO FOOOKAA")
+	rp.SubsequentIPAccess = SubsequentIPAccess{
+		IP:        subsequentIPAccess.IPAddress,
+		Lat:       subsequentIPAccess.Latitude,
+		Lon:       subsequentIPAccess.Longitude,
+		Radius:    subsequentIPAccess.Radius,
+		Timestamp: subsequentIPAccess.UnixTimestamp,
+	}
+
+	//TODO need to calculate speed for PrecedingIPAccess
+}
+
+func (rp *Report) SetTravelToCurrentGeoSuspicious() {
 
 }
 
-func (r *Report) SetTravelToCurrentGeoSuspicious() {
-
-}
-
-func (r *Report) SetTravelFromCurrentGeoSuspicious() {
+func (rp *Report) SetTravelFromCurrentGeoSuspicious() {
 
 }

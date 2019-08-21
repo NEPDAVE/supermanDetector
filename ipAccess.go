@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	gorm "github.com/jinzhu/gorm"
-	"net/http"
 )
 
 //IPAccess represents the JSON data structure posted to the supermanDetector API.
@@ -21,32 +19,19 @@ type IPAccess struct {
 	Radius        int     `json:"radius"`
 }
 
-//New IPAccess takes an *http.Request, decodes it into an IPAccess struct,
-//populates Latitude, Longitude and Radius fields and then writes the struct
-//to the sqlDB.
-func (i IPAccess) NewIPAccess(r *http.Request) *IPAccess {
-	ipAccess := &IPAccess{}
-
-	//Parse json request body and use it to set fields on user
-	//Note that user is passed as a pointer variable so that it's fields can be modified
-	err := json.NewDecoder(r.Body).Decode(&ipAccess)
-	if err != nil {
-		panic(err)
-	}
-
-	if err != nil {
-		logger.Println(err)
-	}
-
+//New IPAccess takes an *IPAccess populates Latitude, Longitude and Radius
+//fields and then writes the struct to the sqlDB.
+func NewIPAccess(ipAccess *IPAccess) *IPAccess {
 	//Setting the IP Latitude, Longitude and Radius fields
 	ipAccess.SetIPCoordinates()
+
 	//Writing the fully populated IPAccess struct to the sqlDB
 	CreateIPAccess(ipAccess)
 
 	return ipAccess
 }
 
-//SetCoordinates calls GetIPCoordinates to query the geoDB and set the IPAccess
+//SetCoordinates calls GetIPCoordinates to query the geoDB and sets the IPAccess
 //Latitude, Longitude and Radius fields
 func (i *IPAccess) SetIPCoordinates() {
 	coordinates := GetIPCoordinates(i.IPAddress)

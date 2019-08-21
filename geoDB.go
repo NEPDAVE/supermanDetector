@@ -24,7 +24,7 @@ func GetIPCoordinates(ipStr string) *Coordinates {
 		panic(err)
 	}
 
-	//TODO think of better way to validate strings here
+	//TODO think of better way to validate string here
 	ip := net.ParseIP(ipStr)
 	record, err := db.City(ip)
 

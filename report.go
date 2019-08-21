@@ -1,8 +1,7 @@
 package main
 
 import (
-	//"fmt"
-	"net/http"
+//"fmt"
 )
 
 type Report struct {
@@ -34,8 +33,8 @@ type SubsequentIPAccess struct {
 	Timestamp int     `json:"timestamp"`
 }
 
-func (rp Report) NewReport(r *http.Request) *Report {
-	ipAccess := IPAccess{}.NewIPAccess(r)
+func NewReport(ipAccess *IPAccess) *Report {
+	ipAccess = NewIPAccess(ipAccess)
 	report := &Report{}
 
 	report.SetCurrentGeo(ipAccess.Latitude, ipAccess.Longitude, ipAccess.Radius)

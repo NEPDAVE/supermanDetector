@@ -24,9 +24,23 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//passing the request to NewReport to kick things off
-	report := Report{}.NewReport(r)
+	ipAccess := &IPAccess{}
 
+	//Parse json request body and use it to set fields on user
+	//Note that user is passed as a pointer variable so that it's fields can be modified
+	err := json.NewDecoder(r.Body).Decode(&ipAccess)
+	if err != nil {
+		panic(err)
+	}
+
+	if err != nil {
+		logger.Println(err)
+	}
+
+	//passing the IPAccess to NewReport to kick things off
+	report := NewReport(ipAccess)
+
+	//TODO make this not suck
 	//checking that the report was populated
 	reportCheck := &Report{}
 
@@ -51,10 +65,7 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	/*
-		setting up logging
-	*/
-
+	//setting up logging
 	logFile, err := os.Create("log.txt")
 	defer logFile.Close()
 
@@ -65,16 +76,10 @@ func main() {
 
 	logger = log.New(logFile, "supermanDetector ", log.LstdFlags|log.Lshortfile)
 
-	/*
-	  setting up sqlite db and migrating the schema
-	*/
-
+	//setting up sqlite db and migrating the schema
 	MigrateDB()
 
-	/*
-		starting the server
-	*/
-
+	//starting the server
 	logger.Println("Starting Server!")
 
 	//TODO make sure to set timeouts on server

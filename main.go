@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -116,5 +117,15 @@ func main() {
 	//TODO make sure to set timeouts on server
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/ipaccess", IPAccessHandler)
-	http.ListenAndServe(":5000", mux)
+	//http.ListenAndServe(":5000", mux)
+
+  //creating custom server with timeouts and custom handler
+	s := &http.Server{
+	Addr:           ":5000",
+	Handler:        mux,
+	ReadTimeout:    10 * time.Second,
+	WriteTimeout:   10 * time.Second,
+}
+
+s.ListenAndServe()
 }

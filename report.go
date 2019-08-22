@@ -100,6 +100,7 @@ func (r *Report) SetSubsequentIPAccess(unixTimestamp int, eventUUID string,
 
 	//checking for an ip of "" to prevent a false positive
 	if subsequentIPAccess.IPAddress == "" {
+		fmt.Println("nothing here")
 		return
 	}
 
@@ -119,7 +120,12 @@ func (r *Report) SetSubsequentIPAccess(unixTimestamp int, eventUUID string,
 	_, km := haversine.Distance(currentCoord, precedingCoord)
 
 	time := subsequentIPAccess.UnixTimestamp - unixTimestamp
-	r.PrecedingIPAccess.Speed = CalculateSpeed(time, km)
+	speed := CalculateSpeed(time, km)
+	r.SubsequentIPAccess.Speed = speed
+
+	fmt.Println("SubsequentIPAccess shit")
+	fmt.Println(km)
+	fmt.Println(speed)
 }
 
 func (r *Report) SetTravelToCurrentGeoSuspicious() {

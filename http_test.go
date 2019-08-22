@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"bytes"
 	"net/http"
 	"net/http/httptest"
@@ -54,8 +53,8 @@ var (
 // {"%-a", "[%-a]"},
 // {"%+a", "[%+a]"},
 
-func TestFlagParser(t *testing.T) {
-	var tableTests = []struct {
+func TestAPI(t *testing.T) {
+	tableTests := []struct {
 		in  string
 		out string
 	}{
@@ -66,47 +65,31 @@ func TestFlagParser(t *testing.T) {
 	//var flagprinter flagPrinter
 	for _, tt := range tableTests {
 		t.Run(tt.in, func(t *testing.T) {
-			//s := Sprintf(tt.in, &flagprinter)
-			// if s != tt.out {
-			// 	t.Errorf("got %q, want %q", s, tt.out)
-			// }
+      jsonStr := []byte(tt.in)
+
+      req, err := http.NewRequest("POST", "localhost:5000/v1/ipaccess",
+        bytes.NewBuffer(jsonStr))
+
+      if err != nil {
+        t.Fatal(err)
+      }
+
+      req.Header.Set("Content-Type", "application/json")
+      w := httptest.NewRecorder()
+      handler := http.HandlerFunc(IPAccessHandler)
+      handler.ServeHTTP(w, req)
+
+      if status := w.Code; status != http.StatusOK {
+        t.Errorf("handler returned wrong status code: got %v want %v",
+          status, http.StatusOK)
+      }
+
+      expected := tt.out
+
+      if strings.Join(strings.Fields(w.Body.String()), "") != strings.Join(strings.Fields(expected), "") {
+        t.Errorf("handler returned unexpected body: \n\n got \n\n %v \n want \n %v",
+          w.Body.String(), expected)
+      }
 		})
-	}
-}
-
-func TestCreateEntry(t *testing.T) {
-
-	// var jsonStr = []byte(`{"username": "bob", "unix_timestamp": 1514764800,
-	//   "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e42",
-	//   "ip_address": "206.81.252.6"}`)
-
-	var jsonStr = []byte(inputA)
-
-	req, err := http.NewRequest("POST", "localhost:5000/v1/ipaccess",
-		bytes.NewBuffer(jsonStr))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(IPAccessHandler)
-	handler.ServeHTTP(w, req)
-
-	if status := w.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-	//NOTE! Making this a multiline string fails the test
-	//expected := `{"currentGeo":{"lat":39.211,"lon":-76.8362,"radius":5},"travelToCurrentGeoSuspicious":false,"travelFromCurrentGeoSuspicious":false,"precedingIpAccess":{"ip":"","speed":0,"lat":0,"lon":0,"radius":0,"timestamp":0},"subsequentIpAccess":{"ip":"","speed":0,"lat":0,"lon":0,"radius":0,"timestamp":0}}`
-	expected := outputA
-
-  fmt.Println(expected)
-
-	if strings.TrimSpace(w.Body.String()) != strings.Join(strings.Fields(expected), "") {
-		t.Errorf("handler returned unexpected body: \n\n got \n\n %v \n want \n %v",
-			w.Body.String(), expected)
 	}
 }

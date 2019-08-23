@@ -18,7 +18,7 @@ func MigrateDB() error {
 	}
 
 	// Drop model IPAccess table
-	db.DropTable(&IPAccess{})
+	//db.DropTable(&IPAccess{})
 
 	// Migrate the schema
 	db.AutoMigrate(&IPAccess{})

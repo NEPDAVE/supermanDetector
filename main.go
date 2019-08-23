@@ -98,7 +98,7 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	//setting up logging
-	logFile, err := os.Create("log.txt")
+	logFile, err := os.Create("/tmp/log.txt")
 	defer logFile.Close()
 
 	//panicking if unable to successfully create a log file

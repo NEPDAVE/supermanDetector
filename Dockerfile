@@ -1,21 +1,15 @@
 # build stage
 FROM golang as builder
-
 ENV GO111MODULE=on
-
 WORKDIR /app
-
-COPY go.mod .
-COPY go.sum .
-
 RUN go mod download
-
 COPY . .
-
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o sd .
-
+# https://golang.org/cmd/link/ (space-separated flags to pass to the external linker)
+# https://www.elwinar.com/articles/statically-link-golang-binaries
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o sd .
 # final stage
-FROM scratch
+FROM alpine:latest AS runtime
 COPY --from=builder /app/sd /app/
 EXPOSE 5000
 ENTRYPOINT ["/app/sd"]
+

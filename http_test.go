@@ -255,7 +255,7 @@ var (
 func TestAPI(t *testing.T) {
 
 	//Droping IPAccess table the remigrating it
-  DropIPAccessTable()
+	DropIPAccessTable()
 	MigrateDB()
 
 	tableTests := []struct {

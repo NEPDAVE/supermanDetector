@@ -85,13 +85,13 @@ func main() {
 	mux.HandleFunc("/v1/ipaccess", IPAccessHandler)
 	//http.ListenAndServe(":5000", mux)
 
-  //creating custom server with timeouts and custom handler
+	//creating custom server with timeouts and custom handler
 	s := &http.Server{
-	Addr:           ":5000",
-	Handler:        mux,
-	ReadTimeout:    10 * time.Second,
-	WriteTimeout:   10 * time.Second,
-}
+		Addr:         ":5000",
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
 
-s.ListenAndServe()
+	s.ListenAndServe()
 }

@@ -13,40 +13,6 @@ var (
 	logger *log.Logger //global logging object
 )
 
-/*
-There is a bug in the challenge.
-
-In the Expected Request there is a timestamp of:                                   1514764800
-In the Expected Response for the proceeding ip access there is the same timestamp: 1514764800
-
-Hong_Kong - 0,2
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764000, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e40", "ip_address": "119.28.48.231"}' http://localhost:5000/v1/ipaccess
-
-New York - 1,1
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764001, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e41", "ip_address": "206.81.252.6"}' http://localhost:5000/v1/ipaccess
-
-Moscow - 2,3
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764002, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e42", "ip_address": "31.173.221.5"}' http://localhost:5000/v1/ipaccess
-
-Hong_Kong - 3,6
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764003, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e43", "ip_address": "119.28.48.231"}' http://localhost:5000/v1/ipaccess
-
-New York - 4,
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764004, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e44", "ip_address": "206.81.252.7"}' http://localhost:5000/v1/ipaccess
-
-New York - 5,5
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764005, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e45", "ip_address": "206.81.252.7"}' http://localhost:5000/v1/ipaccess
-
-Sydney - 6,4
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764006, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e46", "ip_address": "203.2.218.214"}' http://localhost:5000/v1/ipaccess
-
-Sydney - 6,7
-curl -X POST -d '{"username": "bob", "unix_timestamp": 1514764007, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e47", "ip_address": "203.2.218.214"}' http://localhost:5000/v1/ipaccess
-
-
-
-*/
-
 func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 	// Double check it's a post request being made
 	if r.Method != http.MethodPost {

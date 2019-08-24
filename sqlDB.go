@@ -8,22 +8,18 @@ import (
 
 //MigrateDB maps the Login struct fields to a newly created IPAccess SQL table
 //where we can store IPAccesss
-func MigrateDB() error {
+func MigrateDB() {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
 	defer db.Close()
 
 	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
-		panic(err)
+		logger.Println("unable to migrate database")
+		logger.Fatalln(err)
 	}
 
-	// Drop model IPAccess table
-	//db.DropTable(&IPAccess{})
-
-	// Migrate the schema
+	// Migrate the schemaer
 	db.AutoMigrate(&IPAccess{})
-
-	return nil
 }
 
 //CreateIPAccess creates a new IPAccess entry in the IPAccess db table
@@ -31,12 +27,25 @@ func CreateIPAccess(ipAccess *IPAccess) {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
 	defer db.Close()
 
-	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
-		panic(err)
+		logger.Println("unable to create IPAccess in database")
+		logger.Fatalln(err)
 	}
 
 	db.Create(&ipAccess)
+}
+
+//DropIPAccessTable drops the IP Access table to allow for a clean table for testing
+func DropIPAccessTable() {
+	db, err := gorm.Open("sqlite3", "supermanDetector.db")
+	defer db.Close()
+
+	if err != nil {
+		logger.Printf("unable to drop IPAccess table in database: %v", err)
+	}
+
+	// Drop model IPAccess table
+	db.DropTable(&IPAccess{})
 }
 
 func GetPrecedingIPAccess(unixTimestamp int, eventUUID string,
@@ -47,7 +56,7 @@ func GetPrecedingIPAccess(unixTimestamp int, eventUUID string,
 
 	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
-		panic(err)
+		logger.Printf("unable to get preceding IPAccess from database: %v", err)
 	}
 
 	ipAccess := &IPAccess{}
@@ -68,7 +77,7 @@ func GetSubsequentIPAccess(unixTimestamp int, eventUUID string,
 
 	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
-		panic(err)
+		logger.Printf("unable to get subsequent IPAccess from database: %v", err)
 	}
 
 	ipAccess := &IPAccess{}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/umahmood/haversine"
 )
 
@@ -100,7 +99,6 @@ func (r *Report) SetSubsequentIPAccess(unixTimestamp int, eventUUID string,
 
 	//checking for an ip of "" to prevent a false positive
 	if subsequentIPAccess.IPAddress == "" {
-		fmt.Println("nothing here")
 		return
 	}
 
@@ -122,25 +120,18 @@ func (r *Report) SetSubsequentIPAccess(unixTimestamp int, eventUUID string,
 	time := subsequentIPAccess.UnixTimestamp - unixTimestamp
 	speed := CalculateSpeed(time, km)
 	r.SubsequentIPAccess.Speed = speed
-
-	fmt.Println("SubsequentIPAccess shit")
-	fmt.Println(km)
-	fmt.Println(speed)
 }
 
 func (r *Report) SetTravelToCurrentGeoSuspicious() {
 	if r.PrecedingIPAccess.Speed >= 500 {
 		r.TravelToCurrentGeoSuspicious = true
 	}
-	fmt.Println(r.TravelToCurrentGeoSuspicious)
 }
 
 func (r *Report) SetTravelFromCurrentGeoSuspicious() {
 	if r.SubsequentIPAccess.Speed >= 500 {
 		r.TravelFromCurrentGeoSuspicious = true
 	}
-
-	fmt.Println(r.TravelFromCurrentGeoSuspicious)
 }
 
 //CalculateSpeed takes an amount of time in seconds and a distance in Kilometers

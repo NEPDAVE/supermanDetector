@@ -27,10 +27,6 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 	//Note that user is passed as a pointer variable so that it's fields can be modified
 	err := json.NewDecoder(r.Body).Decode(&ipAccess)
 	if err != nil {
-		panic(err)
-	}
-
-	if err != nil {
 		logger.Println(err)
 	}
 
@@ -48,7 +44,7 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 	//Marshal or convert user object back to json and write to response
 	reportJson, err := json.Marshal(*report)
 	if err != nil {
-		panic(err)
+		logger.Println(err)
 	}
 
 	//Set Content-Type header so that clients will know how to read response
@@ -64,13 +60,14 @@ func IPAccessHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	//setting up logging
-	logFile, err := os.Create("/tmp/log.txt")
-	defer logFile.Close()
+	logFile, err := os.Create("/log.txt")
 
 	//panicking if unable to successfully create a log file
 	if err != nil {
 		panic(err)
 	}
+
+	defer logFile.Close()
 
 	logger = log.New(logFile, "supermanDetector ", log.LstdFlags|log.Lshortfile)
 
@@ -79,11 +76,8 @@ func main() {
 
 	//starting the server
 	logger.Println("Starting Server!")
-
-	//TODO make sure to set timeouts on server
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/ipaccess", IPAccessHandler)
-	//http.ListenAndServe(":5000", mux)
 
 	//creating custom server with timeouts and custom handler
 	s := &http.Server{

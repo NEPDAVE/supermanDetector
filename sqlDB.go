@@ -10,13 +10,13 @@ import (
 //where we can store IPAccesss
 func MigrateDB() {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
-	defer db.Close()
 
 	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
 		logger.Println("unable to migrate database")
 		logger.Fatalln(err)
 	}
+	defer db.Close()
 
 	// Migrate the schemaer
 	db.AutoMigrate(&IPAccess{})
@@ -25,12 +25,12 @@ func MigrateDB() {
 //CreateIPAccess creates a new IPAccess entry in the IPAccess db table
 func CreateIPAccess(ipAccess *IPAccess) {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
-	defer db.Close()
 
 	if err != nil {
 		logger.Println("unable to create IPAccess in database")
 		logger.Fatalln(err)
 	}
+	defer db.Close()
 
 	db.Create(&ipAccess)
 }
@@ -38,11 +38,11 @@ func CreateIPAccess(ipAccess *IPAccess) {
 //DropIPAccessTable drops the IP Access table to allow for a clean table for testing
 func DropIPAccessTable() {
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
-	defer db.Close()
 
 	if err != nil {
 		logger.Printf("unable to drop IPAccess table in database: %v", err)
 	}
+	defer db.Close()
 
 	// Drop model IPAccess table
 	db.DropTable(&IPAccess{})
@@ -50,14 +50,12 @@ func DropIPAccessTable() {
 
 func GetPrecedingIPAccess(unixTimestamp int, eventUUID string,
 	userName string) *IPAccess {
-
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
-	defer db.Close()
 
-	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
 		logger.Printf("unable to get preceding IPAccess from database: %v", err)
 	}
+	defer db.Close()
 
 	ipAccess := &IPAccess{}
 
@@ -71,14 +69,12 @@ func GetPrecedingIPAccess(unixTimestamp int, eventUUID string,
 
 func GetSubsequentIPAccess(unixTimestamp int, eventUUID string,
 	userName string) *IPAccess {
-
 	db, err := gorm.Open("sqlite3", "supermanDetector.db")
-	defer db.Close()
 
-	//panicking if unable to successfully connect to the sqliteDB
 	if err != nil {
 		logger.Printf("unable to get subsequent IPAccess from database: %v", err)
 	}
+	defer db.Close()
 
 	ipAccess := &IPAccess{}
 

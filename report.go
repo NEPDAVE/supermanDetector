@@ -37,6 +37,12 @@ func NewReport(ipAccess *IPAccess) *Report {
 	ipAccess = NewIPAccess(ipAccess)
 	report := &Report{}
 
+	//checking that the ipAccess was populated
+	ipAccessCheck := &IPAccess{}
+	if ipAccess == ipAccessCheck {
+		return report
+	}
+
 	report.SetCurrentGeo(ipAccess.Latitude, ipAccess.Longitude, ipAccess.Radius)
 
 	report.SetPrecedingIPAccess(ipAccess.UnixTimestamp, ipAccess.EventUUID,

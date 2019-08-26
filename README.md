@@ -15,7 +15,7 @@ An SQLite database is used to store the IP Access along with the coordinates of 
 #### Longitude
 #### Location Radius 
 
-A database query for previous and subsequent IP Accesses by the user executes. The query results go into a _`JSON IP Access Report`_ containing data about the current, previous, and subsequent IP Access. The report also contains the best guess about whether the previous or subsequent IP Access is suspicious. The IPAccess Report is returned to the API caller and has the following structure:
+When a new IP Access is posted to the API, a database query for previous and subsequent IP Accesses by the user executes. The query results go into a _`JSON IP Access Report`_ containing data about the current, previous, and subsequent IP Access. The report also contains the best guess about whether the previous or subsequent IP Access is suspicious. The IPAccess Report is returned to the API caller and has the following structure:
 ```
 {"currentGeo":{"lat":39.211,"lon":-76.8362,"radius":5},"travelToCurrentGeoSuspicious":false,"travelFromCurrentGeoSuspicious":true,"precedingIpAccess":{"ip":"","speed":0,"lat":0,"lon":0,"radius":0,"timestamp":0},"subsequentIpAccess":{"ip":"203.2.218.214","speed":11331113,"lat":-33.8919,"lon":151.1554,"radius":500,"timestamp":1514764006}}
 ```

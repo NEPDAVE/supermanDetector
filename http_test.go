@@ -244,6 +244,9 @@ var (
 		"timestamp": 0
 	}
 }`
+
+	input8  = "fail"
+	output8 = "Server Error 500 - Please try again"
 )
 
 //TestAPI tests a series of POST requests in a specific order. The prearranged
@@ -269,6 +272,7 @@ func TestAPI(t *testing.T) {
 		{input5, output5},
 		{input6, output6},
 		{input7, output7},
+		{input8, output8},
 	}
 
 	for _, tt := range tableTests {

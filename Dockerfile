@@ -1,28 +1,23 @@
 # build stage
-#FROM frolvlad/alpine-glibc
-#FROM golang as builder
-
-#FROM alpine-pkg-glibc
-#FROM golang:alpine as builder
-#FROM blang/golang-alpine as builder
-
-
+# using ubuntu to ensure base images uses Glibc not Musl to help avoid dependency runtime errors
 FROM ubuntu:18.04 as builder
 
-# Update and upgrade repo
+# update and upgrade ubuntu
 RUN apt-get update -y -q && apt-get upgrade -y -q
 
-# Install tools we might need
+# install curl
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q curl build-essential ca-certificates git
 
-# Download Go 1.2.2 and install it to /usr/local/go
+# download go 1.12
 RUN curl -s https://storage.googleapis.com/golang/go1.12.2.linux-amd64.tar.gz| tar -v -C /usr/local -xz
 
-# Let's people find our Go binaries
+# create GOPATH
 ENV PATH $PATH:/usr/local/go/bin
 
+# enable go mod
 ENV GO111MODULE=on
 
+# build image
 WORKDIR /app/
 
 COPY go.mod .
@@ -33,18 +28,14 @@ RUN go mod download
 
 COPY . .
 
-#RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o sd .
-#RUN CGO_ENABLED=0 GOOS=linux go build -o sd .
-#RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o sd .
+#using external linker for build to account for sqlite driver and GeoLite2 dependencies
+#https://golang.org/cmd/link/ (space-separated flags to pass to the external linker)
+#https://www.elwinar.com/articles/statically-link-golang-binaries
 RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o sd .
-#RUN CGO_ENABLED=1 go build -a -installsuffix cgo -o sd .
 
 # final stage
-#FROM ubuntu:18.04
 FROM scratch
 WORKDIR /app/
 COPY --from=builder /app/sd /app/GeoLite2-City.mmdb /app/
-#COPY GeoLite2-City.mmdb .
 EXPOSE 5000
 ENTRYPOINT ["/app/sd"]
-

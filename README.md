@@ -1,7 +1,10 @@
 # supermanDetector
 ## Service for detecting suspicious IP Access.
 
-The service accepts a JSON POST request with data about an IP Access. 
+The service accepts a JSON POST request with data about an IP Access with the following structure:
+```
+{"username": "bob", "unix_timestamp": 1514764006, "event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e46", "ip_address": "203.2.218.214"}
+```
 An SQLite database is used to store the IP Access along with the coordinates of the IP Access. The database contains the following fields. 
 
 #### UUID identifying the login attempt
@@ -12,7 +15,10 @@ An SQLite database is used to store the IP Access along with the coordinates of 
 #### Longitude
 #### Location Radius 
 
-A database query for previous and subsequent IP Accesses by the user executes. The query results go into a _`JSON IP Access Report`_ containing data about the current, previous, and subsequent IP Access. The report also contains the best guess about whether the previous or subsequent IP Access is suspicious. 
+A database query for previous and subsequent IP Accesses by the user executes. The query results go into a _`JSON IP Access Report`_ containing data about the current, previous, and subsequent IP Access. The report also contains the best guess about whether the previous or subsequent IP Access is suspicious. The IPAccess Report is returned to the API caller and has the following structure:
+```
+{"currentGeo":{"lat":39.211,"lon":-76.8362,"radius":5},"travelToCurrentGeoSuspicious":false,"travelFromCurrentGeoSuspicious":true,"precedingIpAccess":{"ip":"","speed":0,"lat":0,"lon":0,"radius":0,"timestamp":0},"subsequentIpAccess":{"ip":"203.2.218.214","speed":11331113,"lat":-33.8919,"lon":151.1554,"radius":500,"timestamp":1514764006}}
+```
 
 If a user would need to travel over 500 km an hour to each destination to sign in - the IP Access is considered suspicious. The service can check the "travel speed" of a user by examining the timestamp and coordinates of the previous and subsequent IP Accesses.
 
